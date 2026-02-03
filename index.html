@@ -197,11 +197,82 @@
             background: white;
             border-top: 2px solid #e9ecef;
         }
+        /* ===== Modal ===== */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 31, 63, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    animation: modalPop 0.25s ease-out;
+}
+
+.modal-content h2 {
+    color: #001f3f;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.modal-content p {
+    color: #495057;
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.modal-content input:focus {
+    border-color: #001f3f;
+}
+
+.modal-buttons {
+    margin-top: 1.5rem;
+}
+
+.modal-buttons button {
+    width: 100%;
+}
+
+@keyframes modalPop {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
     </style>
 </head>
 <body>
     <header>
-        <h1>FLAPPY BIRD</h1>
+        <h1>FLAPPY MO</h1>
     </header>
 
     <div class="game-container">
@@ -225,7 +296,7 @@
     </div>
 
     <footer>
-        Built with HTML5 Canvas
+        YOUR SCORES ARE BOMB DOT COM
     </footer>
 
     <script>
@@ -237,6 +308,22 @@
         // Load bird image
         const birdImg = new Image();
         birdImg.src = 'mobird.png';
+        
+        const nameModal = document.getElementById('nameModal');
+        const nameInput = document.getElementById('playerNameInput');
+        const submitNameBtn = document.getElementById('submitNameBtn');
+
+        function showNameModal() {
+            nameModal.classList.remove('hidden');
+            nameInput.value = '';
+            setTimeout(() => nameInput.focus(), 50);
+        }
+
+        function hideNameModal() {
+            nameModal.classList.add('hidden');
+        }
+
+
 
         // Game variables
         let bird = {
@@ -277,45 +364,26 @@
         const LEADERBOARD_API = 'https://script.google.com/macros/s/AKfycbwzSgrk6qRDBhAOF3FW28j_MUrOWzJWRSeIjaaIwgERCRB5FUhMfe98xxb-b1E4aWP2/exec';
 
         // Leaderboard submission function (configured for Google Sheets)
-        async function submitScore(playerScore, isHighScore) {
-            // Only prompt for name if this is a high score
-            if (isHighScore) {
-                if (!playerName) {
-                    playerName = prompt('🎉 New High Score! Enter your name for the leaderboard:') || 'Anonymous';
-                }
-            } else {
-                // For non-high scores, use existing name or Anonymous
-                if (!playerName) {
-                    playerName = 'Anonymous';
-                }
-            }
-            
-            try {
-                // Use GET request with URL parameters to avoid CORS
-                const params = new URLSearchParams({
-                    action: 'submit',
-                    score: playerScore,
-                    playerName: playerName,
-                    timestamp: new Date().toISOString()
-                });
-                
-                const response = await fetch(`${LEADERBOARD_API}?${params.toString()}`, {
-                    method: 'GET',
-                    redirect: 'follow'
-                });
-                
-                const data = await response.json();
-                console.log('Score submitted to leaderboard:', data);
-                
-                // Refresh leaderboard after submission
-                setTimeout(() => getLeaderboard(), 1000);
-                
-                return true;
-            } catch (error) {
-                console.error('Error submitting score:', error);
-                return false;
-            }
+        async function submitScore(playerScore) {
+        try {
+            const params = new URLSearchParams({
+                action: 'submit',
+                score: playerScore,
+                playerName: playerName || 'Anonymous',
+                timestamp: new Date().toISOString()
+            });
+
+            const response = await fetch(`${LEADERBOARD_API}?${params.toString()}`);
+            const data = await response.json();
+
+            setTimeout(() => getLeaderboard(), 1000);
+            return true;
+        } catch (error) {
+            console.error('Error submitting score:', error);
+            return false;
         }
+    }
+
 
         // Fetch and display leaderboard
         async function getLeaderboard() {
@@ -534,15 +602,16 @@
                 // When game ends, update high score
                 if (gameOver && currentGameScore > 0 && !scoreSubmitted) {
                     const isNewHighScore = currentGameScore > highScore;
-                    
+
                     if (isNewHighScore) {
                         highScore = currentGameScore;
+                        showNameModal(); // 👈 SHOW MODAL
+                    } else {
+                        submitScore(currentGameScore);
+                        scoreSubmitted = true;
                     }
-                    
-                    // Submit to leaderboard
-                    submitScore(currentGameScore, isNewHighScore);
-                    scoreSubmitted = true;
                 }
+
 
                 frameCount++;
             }
@@ -623,6 +692,20 @@
             }
         });
 
+        submitNameBtn.addEventListener('click', () => {
+            playerName = nameInput.value.trim() || 'Anonymous';
+            hideNameModal();
+            submitScore(currentGameScore);
+            scoreSubmitted = true;
+        });
+
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                submitNameBtn.click();
+            }
+        });
+
+
         canvas.addEventListener('click', jump);
 
         restartBtn.addEventListener('click', () => {
@@ -643,5 +726,20 @@
         // Load leaderboard on page load
         getLeaderboard();
     </script>
+    <div id="nameModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>🎉 New High Score!</h2>
+        <p>Enter your name for the leaderboard</p>
+        <input
+            id="playerNameInput"
+            type="text"
+            placeholder="Your name"
+            maxlength="20"
+        />
+        <div class="modal-buttons">
+            <button id="submitNameBtn">Submit</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
