@@ -328,14 +328,17 @@
         const nameModal = document.getElementById('nameModal');
         const nameInput = document.getElementById('playerNameInput');
         const submitNameBtn = document.getElementById('submitNameBtn');
+        let modalOpen = false;
 
         function showNameModal() {
+            modalOpen = true;
             nameModal.classList.remove('hidden');
             nameInput.value = '';
             setTimeout(() => nameInput.focus(), 50);
         }
 
         function hideNameModal() {
+            modalOpen = false;
             nameModal.classList.add('hidden');
         }
 
@@ -567,7 +570,7 @@
 
         // Update game
         function update() {
-            if (gameOver) return;
+            if (gameOver || modalOpen) return;
 
             if (gameStarted) {
                 // Update bird
