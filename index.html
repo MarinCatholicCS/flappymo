@@ -692,20 +692,6 @@
             }
         });
 
-        submitNameBtn.addEventListener('click', () => {
-            playerName = nameInput.value.trim() || 'Anonymous';
-            hideNameModal();
-            submitScore(currentGameScore);
-            scoreSubmitted = true;
-        });
-
-        nameInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                submitNameBtn.click();
-            }
-        });
-
-
         canvas.addEventListener('click', jump);
 
         restartBtn.addEventListener('click', () => {
@@ -719,6 +705,20 @@
             frameCount = 0;
             scoreSubmitted = false;
         });
+
+        submitNameBtn.addEventListener('click', () => {
+            playerName = nameInput.value.trim() || 'Anonymous';
+            hideNameModal();
+            submitScore(currentGameScore);
+            scoreSubmitted = true;
+        });
+
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                submitNameBtn.click();
+            }
+        });
+
 
         // Start game loop
         gameLoop();
