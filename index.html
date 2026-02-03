@@ -527,7 +527,7 @@
                 });
 
                 // Check boundaries (including ground)
-                if (bird.y + bird.height > canvas.height - 100 || bird.y < 0) {
+                if (bird.y + bird.height > canvas.height || bird.y < 0) {
                     gameOver = true;
                 }
                 
@@ -555,7 +555,7 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // Draw ground
-            ctx.fillStyle = '#DED895';
+            ctx.fillStyle = '#5078e6';
             ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
             
             // Ground stripes
