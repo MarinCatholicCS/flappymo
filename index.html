@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: white;
+            background: #f8f9fa;
             color: #001f3f;
             display: flex;
             flex-direction: column;
@@ -26,15 +26,16 @@
             position: absolute;
             top: 0;
             width: 100%;
-            padding: 2rem;
+            padding: 1.5rem;
             text-align: center;
-            border-bottom: 3px solid #001f3f;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
         }
 
         h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: -1px;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
             color: #001f3f;
         }
 
@@ -42,26 +43,31 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.5rem;
+            gap: 2rem;
         }
 
         #gameCanvas {
-            border: 4px solid #001f3f;
+            border: 2px solid #001f3f;
             display: block;
-            box-shadow: 0 8px 0 #001f3f;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 31, 63, 0.1);
         }
 
         .controls {
             display: flex;
-            gap: 1rem;
+            gap: 2rem;
             align-items: center;
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .score-display {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: #001f3f;
-            min-width: 120px;
+            min-width: 100px;
             text-align: center;
         }
 
@@ -70,14 +76,19 @@
             color: white;
             border: none;
             padding: 0.75rem 2rem;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 0.95rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.1s;
+            border-radius: 50px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         button:hover {
-            transform: translateY(-2px);
+            background: #003366;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 31, 63, 0.2);
         }
 
         button:active {
@@ -86,20 +97,105 @@
 
         .instructions {
             text-align: center;
-            color: #001f3f;
-            font-size: 0.95rem;
+            color: #6c757d;
+            font-size: 0.9rem;
             max-width: 400px;
+        }
+
+        .leaderboard {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .leaderboard h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #001f3f;
+            margin-bottom: 1rem;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+
+        .leaderboard-list {
+            list-style: none;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .leaderboard-item:hover {
+            background: #e9ecef;
+            transform: translateX(4px);
+        }
+
+        .leaderboard-rank {
+            font-weight: 800;
+            color: #001f3f;
+            min-width: 30px;
+        }
+
+        .leaderboard-rank.top1 {
+            color: #FFD700;
+        }
+
+        .leaderboard-rank.top2 {
+            color: #C0C0C0;
+        }
+
+        .leaderboard-rank.top3 {
+            color: #CD7F32;
+        }
+
+        .leaderboard-name {
+            flex: 1;
+            padding: 0 1rem;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .leaderboard-score {
+            font-weight: 700;
+            color: #001f3f;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .leaderboard-loading {
+            text-align: center;
+            color: #6c757d;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        .leaderboard-error {
+            text-align: center;
+            color: #dc3545;
+            padding: 1rem;
+            font-size: 0.9rem;
         }
 
         footer {
             position: absolute;
             bottom: 0;
             width: 100%;
-            padding: 1.5rem;
+            padding: 1rem;
             text-align: center;
-            border-top: 3px solid #001f3f;
-            font-size: 0.9rem;
-            color: #001f3f;
+            font-size: 0.85rem;
+            color: #6c757d;
+            background: white;
+            border-top: 2px solid #e9ecef;
         }
     </style>
 </head>
@@ -119,6 +215,13 @@
         <div class="instructions">
             Press SPACE or click to flap. Avoid the pipes!
         </div>
+
+        <div class="leaderboard">
+            <h2>🏆 LEADERBOARD</h2>
+            <div id="leaderboardContent" class="leaderboard-loading">
+                Loading scores...
+            </div>
+        </div>
     </div>
 
     <footer>
@@ -133,17 +236,7 @@
 
         // Load bird image
         const birdImg = new Image();
-        birdImg.src = 'data:image/svg+xml,' + encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="34" height="24" viewBox="0 0 34 24">
-                <!-- Body -->
-                <ellipse cx="17" cy="12" rx="13" ry="10" fill="#FFD700"/>
-                <!-- Beak -->
-                <polygon points="28,12 34,10 34,14" fill="#FF8C00"/>
-                <!-- Eye -->
-                <circle cx="22" cy="10" r="3" fill="white"/>
-                <circle cx="23" cy="10" r="1.5" fill="black"/>
-            </svg>
-        `);
+        birdImg.src = 'mobird.png';
 
         // Game variables
         let bird = {
@@ -167,19 +260,34 @@
         let gameStarted = false;
         let frameCount = 0;
         let playerName = ''; // Store player name for leaderboard
+        let scoreSubmitted = false; // Prevent multiple submissions
 
         const pipeWidth = 60;
         const pipeGap = 160;
         const pipeSpeed = 2;
 
+        const pipeImg = new Image();
+        pipeImg.src = 'mopipe.png';
+
+        const pipeCapImg = new Image();
+        pipeCapImg.src = 'mopipecap.png';
+
+
         // Google Sheets Web App URL - Replace with your deployed script URL
-        const LEADERBOARD_API = 'https://script.google.com/macros/s/AKfycbzer3gRa5MVRX4bLA8AOdVlDLN-gOEQs0dib0o1n2xWVHDVyMZwl-55Wjz8ff7s6kSZ/exec';
+        const LEADERBOARD_API = 'https://script.google.com/macros/s/AKfycbwzSgrk6qRDBhAOF3FW28j_MUrOWzJWRSeIjaaIwgERCRB5FUhMfe98xxb-b1E4aWP2/exec';
 
         // Leaderboard submission function (configured for Google Sheets)
-        async function submitScore(playerScore) {
-            // Prompt for player name if not set
-            if (!playerName) {
-                playerName = prompt('Enter your name for the leaderboard:') || 'Anonymous';
+        async function submitScore(playerScore, isHighScore) {
+            // Only prompt for name if this is a high score
+            if (isHighScore) {
+                if (!playerName) {
+                    playerName = prompt('🎉 New High Score! Enter your name for the leaderboard:') || 'Anonymous';
+                }
+            } else {
+                // For non-high scores, use existing name or Anonymous
+                if (!playerName) {
+                    playerName = 'Anonymous';
+                }
             }
             
             try {
@@ -198,6 +306,10 @@
                 
                 const data = await response.json();
                 console.log('Score submitted to leaderboard:', data);
+                
+                // Refresh leaderboard after submission
+                setTimeout(() => getLeaderboard(), 1000);
+                
                 return true;
             } catch (error) {
                 console.error('Error submitting score:', error);
@@ -207,18 +319,53 @@
 
         // Fetch and display leaderboard
         async function getLeaderboard() {
+            const leaderboardContent = document.getElementById('leaderboardContent');
+            
             try {
                 const response = await fetch(`${LEADERBOARD_API}?action=get`);
                 const data = await response.json();
                 
-                if (data.status === 'success') {
+                if (data.status === 'success' && data.leaderboard && data.leaderboard.length > 0) {
                     console.log('Leaderboard:', data.leaderboard);
+                    displayLeaderboard(data.leaderboard);
                     return data.leaderboard;
+                } else {
+                    leaderboardContent.innerHTML = '<div class="leaderboard-loading">No scores yet. Be the first!</div>';
+                    return [];
                 }
             } catch (error) {
                 console.error('Error fetching leaderboard:', error);
+                leaderboardContent.innerHTML = '<div class="leaderboard-error">Unable to load leaderboard</div>';
                 return null;
             }
+        }
+
+        // Display leaderboard in UI
+        function displayLeaderboard(scores) {
+            const leaderboardContent = document.getElementById('leaderboardContent');
+            
+            if (!scores || scores.length === 0) {
+                leaderboardContent.innerHTML = '<div class="leaderboard-loading">No scores yet. Be the first!</div>';
+                return;
+            }
+
+            const listHTML = scores.map((entry, index) => {
+                const rank = index + 1;
+                let rankClass = '';
+                if (rank === 1) rankClass = 'top1';
+                else if (rank === 2) rankClass = 'top2';
+                else if (rank === 3) rankClass = 'top3';
+
+                return `
+                    <li class="leaderboard-item">
+                        <span class="leaderboard-rank ${rankClass}">#${rank}</span>
+                        <span class="leaderboard-name">${entry.playerName || 'Anonymous'}</span>
+                        <span class="leaderboard-score">${entry.score}</span>
+                    </li>
+                `;
+            }).join('');
+
+            leaderboardContent.innerHTML = `<ul class="leaderboard-list">${listHTML}</ul>`;
         }
 
         // Create pipe
@@ -279,35 +426,60 @@
             ctx.restore();
         }
 
-        // Draw pipes (classic Flappy Bird style)
+        // Draw pipes (simple solid blocks)
         function drawPipes() {
             pipes.forEach(pipe => {
-                // Top pipe
-                ctx.fillStyle = '#5CB85C';
-                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
-                
-                // Top pipe cap
-                ctx.fillRect(pipe.x - 5, pipe.topHeight - 30, pipeWidth + 10, 30);
-                
-                // Top pipe outline
-                ctx.strokeStyle = '#3D8B3D';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(pipe.x, 0, pipeWidth, pipe.topHeight);
-                ctx.strokeRect(pipe.x - 5, pipe.topHeight - 30, pipeWidth + 10, 30);
-                
-                // Bottom pipe
-                ctx.fillStyle = '#5CB85C';
-                ctx.fillRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY);
-                
+                // --- TOP PIPE (flipped) ---
+                ctx.save();
+                ctx.translate(pipe.x + pipeWidth, pipe.topHeight);
+                ctx.scale(1, -1);
+
+                ctx.drawImage(
+                    pipeImg,
+                    0,
+                    0,
+                    pipeWidth,
+                    pipe.topHeight
+                );
+
+                ctx.restore();
+
+                // --- BOTTOM PIPE ---
+                ctx.drawImage(
+                    pipeImg,
+                    pipe.x,
+                    pipe.bottomY,
+                    pipeWidth,
+                    canvas.height - pipe.bottomY
+                );
+
+                const capHeight = 20;
+
                 // Bottom pipe cap
-                ctx.fillRect(pipe.x - 5, pipe.bottomY, pipeWidth + 10, 30);
-                
-                // Bottom pipe outline
-                ctx.strokeStyle = '#3D8B3D';
-                ctx.strokeRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY);
-                ctx.strokeRect(pipe.x - 5, pipe.bottomY, pipeWidth + 10, 30);
+                ctx.drawImage(
+                    pipeCapImg,
+                    pipe.x,
+                    pipe.bottomY - capHeight,
+                    pipeWidth,
+                    capHeight
+                );
+
+                // Top pipe cap (flipped)
+                ctx.save();
+                ctx.translate(pipe.x + pipeWidth, pipe.topHeight);
+                ctx.scale(1, -1);
+                ctx.drawImage(
+                    pipeCapImg,
+                    0,
+                    -capHeight,
+                    pipeWidth,
+                    capHeight
+                );
+                ctx.restore();
+
             });
         }
+
 
         // Update game
         function update() {
@@ -360,12 +532,16 @@
                 }
                 
                 // When game ends, update high score
-                if (gameOver && currentGameScore > 0) {
-                    if (currentGameScore > highScore) {
+                if (gameOver && currentGameScore > 0 && !scoreSubmitted) {
+                    const isNewHighScore = currentGameScore > highScore;
+                    
+                    if (isNewHighScore) {
                         highScore = currentGameScore;
                     }
-                    // Submit to leaderboard (uncomment when you've added your Google Sheets URL)
-                    submitScore(currentGameScore);
+                    
+                    // Submit to leaderboard
+                    submitScore(currentGameScore, isNewHighScore);
+                    scoreSubmitted = true;
                 }
 
                 frameCount++;
@@ -458,10 +634,14 @@
             gameOver = false;
             gameStarted = false;
             frameCount = 0;
+            scoreSubmitted = false;
         });
 
         // Start game loop
         gameLoop();
+        
+        // Load leaderboard on page load
+        getLeaderboard();
     </script>
 </body>
 </html>
