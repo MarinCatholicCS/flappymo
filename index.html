@@ -431,7 +431,7 @@
             pipes.forEach(pipe => {
                 // --- TOP PIPE (flipped) ---
                 ctx.save();
-                ctx.translate(pipe.x + pipeWidth, pipe.topHeight);
+                ctx.translate(pipe.x, pipe.topHeight);
                 ctx.scale(1, -1);
 
                 ctx.drawImage(
