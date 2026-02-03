@@ -299,6 +299,22 @@
         YOUR SCORES ARE BOMB DOT COM
     </footer>
 
+    <div id="nameModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>🎉 New High Score!</h2>
+        <p>Enter your name for the leaderboard</p>
+        <input
+            id="playerNameInput"
+            type="text"
+            placeholder="Your name"
+            maxlength="20"
+        />
+        <div class="modal-buttons">
+            <button id="submitNameBtn">Submit</button>
+        </div>
+    </div>
+    </div>
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -726,20 +742,5 @@
         // Load leaderboard on page load
         getLeaderboard();
     </script>
-    <div id="nameModal" class="modal hidden">
-    <div class="modal-content">
-        <h2>🎉 New High Score!</h2>
-        <p>Enter your name for the leaderboard</p>
-        <input
-            id="playerNameInput"
-            type="text"
-            placeholder="Your name"
-            maxlength="20"
-        />
-        <div class="modal-buttons">
-            <button id="submitNameBtn">Submit</button>
-        </div>
-    </div>
-</div>
 </body>
 </html>
