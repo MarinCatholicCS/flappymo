@@ -166,40 +166,57 @@
         let gameOver = false;
         let gameStarted = false;
         let frameCount = 0;
+        let playerName = ''; // Store player name for leaderboard
 
         const pipeWidth = 60;
         const pipeGap = 160;
         const pipeSpeed = 2;
 
-        // Leaderboard submission function (ready for API integration)
+        // Google Sheets Web App URL - Replace with your deployed script URL
+        const LEADERBOARD_API = 'https://script.google.com/macros/s/AKfycbzer3gRa5MVRX4bLA8AOdVlDLN-gOEQs0dib0o1n2xWVHDVyMZwl-55Wjz8ff7s6kSZ/exec';
+
+        // Leaderboard submission function (configured for Google Sheets)
         async function submitScore(playerScore) {
-            // TODO: Configure with your leaderboard API endpoint
-            const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwzSgrk6qRDBhAOF3FW28j_MUrOWzJWRSeIjaaIwgERCRB5FUhMfe98xxb-b1E4aWP2/exec';
+            // Prompt for player name if not set
+            if (!playerName) {
+                playerName = prompt('Enter your name for the leaderboard:') || 'Anonymous';
+            }
             
             try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        timestamp: new Date().toISOString(),
-                        score: playerScore,
-                        playerName: "g",
-                        // Add other data as needed: playerName, sessionId, etc.
-                    })
+                // Use GET request with URL parameters to avoid CORS
+                const params = new URLSearchParams({
+                    action: 'submit',
+                    score: playerScore,
+                    playerName: playerName,
+                    timestamp: new Date().toISOString()
                 });
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Score submitted successfully:', data);
-                    return data;
-                } else {
-                    console.error('Failed to submit score:', response.statusText);
-                    return null;
-                }
+                const response = await fetch(`${LEADERBOARD_API}?${params.toString()}`, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+                
+                const data = await response.json();
+                console.log('Score submitted to leaderboard:', data);
+                return true;
             } catch (error) {
                 console.error('Error submitting score:', error);
+                return false;
+            }
+        }
+
+        // Fetch and display leaderboard
+        async function getLeaderboard() {
+            try {
+                const response = await fetch(`${LEADERBOARD_API}?action=get`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    console.log('Leaderboard:', data.leaderboard);
+                    return data.leaderboard;
+                }
+            } catch (error) {
+                console.error('Error fetching leaderboard:', error);
                 return null;
             }
         }
@@ -347,8 +364,8 @@
                     if (currentGameScore > highScore) {
                         highScore = currentGameScore;
                     }
-                    // Ready to submit to leaderboard - uncomment when API is configured
-                    submitScore(currentGameScore);
+                    // Submit to leaderboard (uncomment when you've added your Google Sheets URL)
+                    // submitScore(currentGameScore);
                 }
 
                 frameCount++;
