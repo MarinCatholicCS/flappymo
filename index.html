@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird</title>
+    <title>Flappy Mo</title>
     <style>
         * {
             margin: 0;
@@ -466,7 +466,7 @@
 
                 // Top pipe cap (flipped)
                 ctx.save();
-                ctx.translate(pipe.x + pipeWidth, pipe.topHeight);
+                ctx.translate(pipe.x, pipe.topHeight);
                 ctx.scale(1, -1);
                 ctx.drawImage(
                     pipeCapImg,
@@ -559,7 +559,7 @@
             ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
             
             // Ground stripes
-            ctx.fillStyle = '#C4B87F';
+            ctx.fillStyle = '#4260b3';
             for (let i = 0; i < canvas.width; i += 20) {
                 ctx.fillRect(i, canvas.height - 100, 10, 100);
             }
